@@ -2,7 +2,10 @@ package com.sample.demo.controllers;
 
 import com.sample.demo.controllers.dto.HttpUserInfoRequest;
 import com.sample.demo.controllers.dto.HttpUserInfoResponse;
+import com.sample.demo.entity.UserInfoModel;
+import com.sample.demo.services.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,16 +18,28 @@ import static com.sample.demo.constants.UserConstants.*;
 @RestController
 public class UserController {
 
+    @Autowired
+    private UserInfoService userInfoService;
+
     @PostMapping
     public ResponseEntity<HttpUserInfoResponse> createUserInfo(@RequestBody HttpUserInfoRequest request){
         log.info(USER_INFO_REQUEST,request);
 
+        ResponseEntity<HttpUserInfoResponse> validatedRequest = validateRequest(request);
+        if (validatedRequest != null) return validatedRequest;
+
+        UserInfoModel response = userInfoService.saveUserInfo(request);
+
+        return null;
+    }
+
+    private ResponseEntity<HttpUserInfoResponse> validateRequest(HttpUserInfoRequest request) {
         if (null == request.getFirstName() ||
                 null == request.getLastName() ||
                 request.getFirstName().isEmpty() ||
                 request.getLastName().isEmpty() ){
 
-            return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE,NEGATIVE_RESULTMESSAGE,NEGATIVE_RESULT_DESCRIPTION),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE, NEGATIVE_RESULTMESSAGE, NEGATIVE_RESULT_DESCRIPTION), HttpStatus.BAD_REQUEST);
 
         }
         return null;
