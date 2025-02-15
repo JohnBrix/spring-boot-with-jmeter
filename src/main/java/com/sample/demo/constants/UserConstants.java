@@ -13,7 +13,7 @@ public class UserConstants {
     public static final String SUCCESSFULLY_SAVED = "successfully saved!";
     public static final String EXCEPTION = "EXCEPTION: {}";
 
-    public static final String SUCCESS= "SUCCESS:";
+    public static final String SUCCESS= "0";
     public static final String USER_CREATED = "user is created!";
 
 
