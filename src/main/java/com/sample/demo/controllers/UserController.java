@@ -21,16 +21,34 @@ public class UserController {
     @Autowired
     private UserInfoService userInfoService;
 
-    @PostMapping
+    @PostMapping("/createUserInfo")
     public ResponseEntity<HttpUserInfoResponse> createUserInfo(@RequestBody HttpUserInfoRequest request){
         log.info(USER_INFO_REQUEST,request);
 
+        //Validate Request
         ResponseEntity<HttpUserInfoResponse> validatedRequest = validateRequest(request);
         if (validatedRequest != null) return validatedRequest;
 
-        UserInfoModel response = userInfoService.saveUserInfo(request);
 
-        return null;
+        //Create UserInfo, Return HttpUserInfoResponse and status code
+        return responseEntityAndCreateUserInfo(request);
+    }
+
+    private ResponseEntity<HttpUserInfoResponse> responseEntityAndCreateUserInfo(HttpUserInfoRequest request) {
+        UserInfoModel response;
+        try{
+            //Save UserInfo
+            response = userInfoService.saveUserInfo(request);
+            log.info(SAVED,response.getId());
+
+            //Success response
+            return new ResponseEntity<>(httpUserInfoResponse(SUCCESS, SUCCESSFULLY_SAVED, USER_CREATED), HttpStatus.CREATED);
+        }catch (Exception e){
+            log.error(EXCEPTION,e.getMessage());
+
+            //Default Handling In case of out of scope
+            return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE, NEGATIVE_RESULTMESSAGE, NEGATIVE_RESULT_DESCRIPTION), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private ResponseEntity<HttpUserInfoResponse> validateRequest(HttpUserInfoRequest request) {
@@ -48,7 +66,7 @@ public class UserController {
     public HttpUserInfoResponse httpUserInfoResponse(String resultcode,
                                                      String resultmessage,
                                                      String resultDescription){
-         HttpUserInfoResponse response = new HttpUserInfoResponse(resultcode,resultmessage,resultDescription);
+        HttpUserInfoResponse response = new HttpUserInfoResponse(resultcode,resultmessage,resultDescription);
         log.info(HTTP_USERINFO_RESPONSE,response);
 
         return response;
