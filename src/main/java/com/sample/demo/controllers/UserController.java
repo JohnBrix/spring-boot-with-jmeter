@@ -30,8 +30,26 @@ public class UserController {
         ResponseEntity<HttpUserInfoResponse> validatedResults = validateRequest(request);
         if (validatedResults != null) return validatedResults;
 
+        //SaveUserInfo, if throw exception return INTERNAL_SERVER_ERROR.
+        ResponseEntity<HttpUserInfoResponse> saveUserInfoResults = saveUserInfo(request);
+        if (saveUserInfoResults != null) return saveUserInfoResults;
 
-        return new ResponseEntity<>(successResponse(), HttpStatus.BAD_REQUEST);
+        //Success and return CREATED.
+        return new ResponseEntity<>(successResponse(), HttpStatus.CREATED);
+    }
+
+    private ResponseEntity<HttpUserInfoResponse> saveUserInfo(HttpUserInfoRequest request) {
+        UserInfoModel saveUserInfoResults;
+
+        try{
+            saveUserInfoResults  = userInfoService.saveUserInfo(request);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return buildInternalServer();
+        }
+
+        log.info(USER_CREATED,saveUserInfoResults.toString());
+        return null;
     }
 
     private static HttpUserInfoResponse successResponse() {
@@ -39,7 +57,7 @@ public class UserController {
                 .resultMessage(SUCCESS)
                 .resultCode(SUCCESS_ZERO)
                 .resultDescription(SUCCESS)
-                .user(new User())
+                .user(new User()) //TODO to be update later
                 .build();
     }
 
@@ -49,9 +67,16 @@ public class UserController {
                 request.getFirstName().isEmpty() ||
                 request.getLastName().isEmpty() ){
 
-            return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE, NEGATIVE_RESULTMESSAGE, NEGATIVE_RESULT_DESCRIPTION), HttpStatus.BAD_REQUEST);
+            return buildBadRequest();
         }
         return null;
+    }
+
+    private ResponseEntity<HttpUserInfoResponse> buildBadRequest() {
+        return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE, BAD_REQUEST, EMPTY_PARAMETER), HttpStatus.BAD_REQUEST);
+    }
+    private ResponseEntity<HttpUserInfoResponse> buildInternalServer() {
+        return new ResponseEntity<>(httpUserInfoResponse(NEGATIVE_RESULTCODE, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public HttpUserInfoResponse httpUserInfoResponse(String resultcode,

@@ -21,7 +21,7 @@ public class UserInfoImpl implements UserInfoService {
 
     @Override
     public UserInfoModel saveUserInfo(HttpUserInfoRequest request){
-        //Notes: Add findById here.
+        //Convert DTO to Entity
         UserInfoModel userInfoModelRequest = objectMapper.convertValue(request,UserInfoModel.class);
 
         log.info(userInfoModelRequest.toString());
