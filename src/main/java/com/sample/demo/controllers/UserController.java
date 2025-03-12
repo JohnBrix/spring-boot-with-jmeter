@@ -3,7 +3,10 @@ package com.sample.demo.controllers;
 import com.sample.demo.controllers.dto.HttpUserInfoRequest;
 import com.sample.demo.controllers.dto.HttpUserInfoResponse;
 import com.sample.demo.controllers.dto.User;
+import com.sample.demo.entity.UserInfoModel;
+import com.sample.demo.services.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +19,10 @@ import static com.sample.demo.constants.UserConstants.*;
 @RestController
 public class UserController {
 
-    @PostMapping
+    @Autowired
+    private UserInfoService userInfoService;
+
+    @PostMapping("/createUserInfo")
     public ResponseEntity<HttpUserInfoResponse> createUserInfo(@RequestBody HttpUserInfoRequest request){
         log.info(USER_INFO_REQUEST,request);
 
@@ -30,9 +36,9 @@ public class UserController {
 
     private static HttpUserInfoResponse successResponse() {
         return HttpUserInfoResponse.builder()
-                .resultMessage("SUCCESS")
-                .resultCode("0")
-                .resultDescription("SUCCESS")
+                .resultMessage(SUCCESS)
+                .resultCode(SUCCESS_ZERO)
+                .resultDescription(SUCCESS)
                 .user(new User())
                 .build();
     }
@@ -51,7 +57,12 @@ public class UserController {
     public HttpUserInfoResponse httpUserInfoResponse(String resultcode,
                                                      String resultmessage,
                                                      String resultDescription){
-         HttpUserInfoResponse response = new HttpUserInfoResponse(resultcode,resultmessage,resultDescription);
+         HttpUserInfoResponse response = HttpUserInfoResponse.builder()
+                 .resultCode(resultcode)
+                 .resultMessage(resultmessage)
+                 .resultDescription(resultDescription)
+                 .build();
+
         log.info(HTTP_USERINFO_RESPONSE,response);
 
         return response;
